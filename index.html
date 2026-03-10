@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAVIZX XITER - BYPASS MODE</title>
+    <style>
+        :root {
+            --bg-body: #000000;
+            --bg-card: rgba(13, 13, 13, 0.98);
+            --accent-red: #ff0000;
+            --glow-red: rgba(255, 0, 0, 0.8);
+            --text-main: #ffffff;
+            --text-sub: #888888;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+                url('https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/richie-rich-marvin-blaine.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text-main);
+            transition: opacity 0.5s ease; /* Transição suave para o bypass */
+        }
+
+        /* ESTILO BYPASS ATIVO */
+        body.bypass-active {
+            background-image: none !important;
+            background-color: transparent !important;
+        }
+        
+        body.bypass-active #main-panel, 
+        body.bypass-active #login-screen {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        /* BOTÃO BYPASS FLUTUANTE */
+        #bypass-trigger {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 15px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid var(--accent-red);
+            color: white;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--glow-red);
+        }
+
+        /* TELA DE LOGIN */
+        #login-screen {
+            width: 350px;
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 30px var(--glow-red);
+            backdrop-filter: blur(10px);
+        }
+
+        #login-screen h2 { margin-bottom: 25px; letter-spacing: 2px; color: var(--accent-red); text-shadow: 0 0 10px var(--glow-red); }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: #151515;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            outline: none;
+        }
+
+        /* PAINEL PRINCIPAL */
+        #main-panel {
+            display: none;
+            width: 400px;
+            height: 560px;
+            background: var(--bg-card);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            backdrop-filter: blur(15px);
+        }
+
+        .image-header {
+            width: 90px;
+            height: 90px;
+            margin: 15px auto 5px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid var(--accent-red);
+            box-shadow: 0 0 20px var(--glow-red);
+            background-color: #000;
+        }
+
+        .image-header img { width: 100%; height: 100%; object-fit: cover; }
+
+        header { padding: 10px; text-align: center; }
+        header h1 { font-size: 1.5rem; text-transform: uppercase; text-shadow: 0 0 15px var(--glow-red); }
+
+        .scroll-content { flex: 1; padding: 0 25px; overflow-y: auto; }
+
+        .status-badge {
+            display: block;
+            text-align: center;
+            padding: 6px;
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--accent-red);
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .row-info .title { display: block; font-weight: 600; font-size: 0.85rem; }
+        .row-info .sub { display: block; color: var(--text-sub); font-size: 0.65rem; }
+
+        /* SWITCH GLOW */
+        .switch { width: 40px; height: 20px; position: relative; }
+        .switch input { display: none; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background: #333; border-radius: 34px; transition: .3s;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%; transition: .3s;
+        }
+        input:checked + .slider { background: var(--accent-red); box-shadow: 0 0 15px var(--glow-red); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* BOTÕES */
+        .footer { padding: 15px 25px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.4); }
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .btn-inject { background: var(--accent-red); color: white; box-shadow: 0 0 15px var(--glow-red); }
+        .btn-start { background: transparent; color: white; border: 1px solid #444; }
+    </style>
+</head>
+<body>
+
+    <div id="bypass-trigger" onclick="toggleBypass()">Ativar Bypass</div>
+
+    <div id="login-screen">
+        <div class="image-header" style="margin-top: 0; margin-bottom: 20px;">
+            <img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/richie-rich-marvin-blaine.jpg" alt="Richie">
+        </div>
+        <h2>LOGIN</h2>
+        <input type="text" id="key-input" placeholder="SUA KEY">
+        <button class="btn btn-inject" onclick="checkKey()">ENTRAR</button>
+    </div>
+
+    <div id="main-panel">
+        <div class="image-header">
+            <img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/richie-rich-marvin-blaine.jpg" alt="Richie">
+        </div>
+        <header>
+            <h1>DAVIZX XITER</h1>
+        </header>
+
+        <div class="scroll-content">
+            <div id="status" class="status-badge">AGUARDANDO INJEÇÃO</div>
+
+            <div class="row"><div class="row-info"><span class="title">HS Cabeça</span><span class="sub">Calibração DPI</span></div><label class="switch"><input type="checkbox" class="t"><span class="slider"></span></label></div>
+            <div class="row"><div class="row-info"><span class="title">HS Pescoço</span><span class="sub">Ajuste Eixo Y</span></div><label class="switch"><input type="checkbox" class="t"><span class="slider"></span></label></div>
+            <div class="row"><div class="row-info"><span class="title">Aimkill</span><span class="sub">Prioridade RAM</span></div><label class="switch"><input type="checkbox" class="t"><span class="slider"></span></label></div>
+            <div class="row"><div class="row-info"><span class="title">ESP Linha</span><span class="sub">Overlay 2D</span></div><label class="switch"><input type="checkbox" class="t"><span class="slider"></span></label></div>
+            <div class="row"><div class="row-info"><span class="title">ESP Box</span><span class="sub">Contorno</span></div><label class="switch"><input type="checkbox" class="t"><span class="slider"></span></label></div>
+
+            <div style="padding: 15px 0;">
+                <div style="display:flex; justify-content:space-between; font-size: 11px; margin-bottom: 5px;">
+                    <span>FOV SENS</span>
+                    <span id="fov-val" style="color:red">50</span>
+                </div>
+                <input type="range" id="fov" min="0" max="100" value="50" style="width:100%; accent-color:red;">
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="btn btn-inject" id="btn-inj">INJETAR</button>
+            <button class="btn btn-start" onclick="window.location.href='freefire://'">ABRIR FREE FIRE</button>
+            <div style="text-align:center; font-size:9px; color:#444;">@DAVI.SANTXS7</div>
+        </div>
+    </div>
+
+    <script>
+        // Função Bypass (Esconde/Mostra tudo)
+        let bypassOn = false;
+        function toggleBypass() {
+            bypassOn = !bypassOn;
+            const body = document.body;
+            const btn = document.getElementById('bypass-trigger');
+            
+            if(bypassOn) {
+                body.classList.add('bypass-active');
+                btn.innerText = "Desativar Bypass";
+                btn.style.opacity = "0.05"; // Quase invisível para ninguém notar
+            } else {
+                body.classList.remove('bypass-active');
+                btn.innerText = "Ativar Bypass";
+                btn.style.opacity = "1";
+            }
+        }
+
+        function checkKey() {
+            if (document.getElementById('key-input').value === "xit") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'flex';
+            } else { alert("Key Inválida!"); }
+        }
+
+        const btnInj = document.getElementById('btn-inj');
+        const status = document.getElementById('status');
+        const fov = document.getElementById('fov');
+        const fovVal = document.getElementById('fov-val');
+
+        fov.oninput = (e) => { fovVal.innerText = e.target.value; status.innerText = "AGUARDANDO INJEÇÃO"; status.style.color = "red"; };
+        document.querySelectorAll('.t').forEach(t => t.onchange = () => { status.innerText = "AGUARDANDO INJEÇÃO"; status.style.color = "red"; });
+
+        btnInj.onclick = () => {
+            if(btnInj.disabled) return;
+            let p = 0;
+            btnInj.disabled = true;
+            status.style.color = "#ffaa00";
+            const timer = setInterval(() => {
+                p += 1;
+                btnInj.innerText = `CARREGANDO ${p}%`;
+                status.innerText = `INJETANDO: ${p}%`;
+                btnInj.style.background = `linear-gradient(90deg, #ff0000 ${p}%, #330000 ${p}%)`;
+                if(p >= 100) {
+                    clearInterval(timer);
+                    btnInj.innerText = "INJETADO!";
+                    status.innerText = "SUCESSO!";
+                    status.style.color = "#00ff00";
+                    setTimeout(() => { btnInj.innerText = "INJETAR"; btnInj.disabled = false; btnInj.style.background = "red"; }, 3000);
+                }
+            }, 100);
+        };
+    </script>
+</body>
+</html>
